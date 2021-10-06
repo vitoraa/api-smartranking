@@ -25,7 +25,7 @@ export class PlayersController {
 
   @Get()
   async getAllPlayers (
-    @Query('email') email: string,
+    @Query('email', PlayersValidationParamsPipe) email: string,
   ): Promise<Player[] | Player> {
     if (email) {
       return await this.playersService.getPlayerByEmail(email);
