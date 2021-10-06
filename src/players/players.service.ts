@@ -16,41 +16,34 @@ export class PlayersService {
 
   async createUpdatePlayer (createPlayerDto: CreatePlayerDto): Promise<void> {
     const { email } = createPlayerDto;
-    //const playerFound = this._findPlayerByEmail(email);
 
     const playerFound = await this.playerModel.findOne({ email }).exec();
 
     if (playerFound) {
-      this.update(createPlayerDto, playerFound);
+      this.update(createPlayerDto);
     } else {
       this.create(createPlayerDto);
     }
   }
 
   async getAllPlayers (): Promise<Player[]> {
-    return await this.players;
+    return await this.playerModel.find().exec();
   }
 
   async getPlayerByEmail (email: string): Promise<Player> {
-    const playerFound = this._findPlayerByEmail(email);
+    const playerFound = this.findPlayerByEmail(email);
     if (!playerFound) {
       throw new NotFoundException(`Player with email ${email} not found`);
     }
     return playerFound;
   }
 
-  async deletePlayerByEmail (email: string): Promise<void> {
-    const playerFound = this._findPlayerByEmail(email);
-    if (!playerFound) {
-      throw new NotFoundException(`Player with email ${email} not found`);
-    }
-    this.players = this.players.filter(
-      (player) => player.email !== playerFound.email,
-    );
+  async deletePlayerByEmail (email: string): Promise<any> {
+    return await this.playerModel.deleteOne({ email }).exec();
   }
 
-  private _findPlayerByEmail (email: string): Player {
-    return this.players.find((player) => player.email === email);
+  private async findPlayerByEmail (email: string): Promise<Player> {
+    return await this.playerModel.findOne({ email }).exec();
   }
 
   private async create (createPlayerDto: CreatePlayerDto): Promise<Player> {
@@ -58,9 +51,9 @@ export class PlayersService {
     return playerFound.save();
   }
 
-  private update (player: CreatePlayerDto, playerFound: Player): void {
-    this.logger.log(`updatePlayerDto: ${player}`);
-    const { name } = player;
-    playerFound.name = name;
+  private async update (player: CreatePlayerDto): Promise<Player> {
+    return await this.playerModel
+      .findOneAndUpdate({ email: player.email }, { $set: player })
+      .exec();
   }
 }
