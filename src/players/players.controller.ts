@@ -3,7 +3,9 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -19,25 +21,33 @@ export class PlayersController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  async createUpdatePlayer (@Body() createPlayerDto: CreatePlayerDto) {
-    await this.playersService.createUpdatePlayer(createPlayerDto);
+  async createPlayer (@Body() createPlayerDto: CreatePlayerDto) {
+    await this.playersService.createPlayer(createPlayerDto);
+  }
+
+  @Put('/:_id')
+  @UsePipes(ValidationPipe)
+  async updatePlayer (
+    @Body() createPlayerDto: CreatePlayerDto,
+    @Param('_id', PlayersValidationParamsPipe) _id: string,
+  ): Promise<void> {
+    await this.playersService.updatePlayer(_id, createPlayerDto);
   }
 
   @Get()
-  async getAllPlayers (
-    @Query('email', PlayersValidationParamsPipe) email: string,
-  ): Promise<Player[] | Player> {
-    if (email) {
-      return await this.playersService.getPlayerByEmail(email);
-    } else {
-      return await this.playersService.getAllPlayers();
-    }
+  async getAllPlayers (): Promise<Player[]> {
+    return await this.playersService.getAllPlayers();
   }
 
-  @Delete()
-  async deletePlayer (
-    @Query('email', PlayersValidationParamsPipe) email: string,
-  ) {
-    return await this.playersService.deletePlayerByEmail(email);
+  @Get('/:_id')
+  async getPlayerbyId (
+    @Param('id', PlayersValidationParamsPipe) _id: string,
+  ): Promise<Player> {
+    return await this.playersService.getPlayerById(_id);
+  }
+
+  @Delete('/:_id')
+  async deletePlayer (@Param('_id', PlayersValidationParamsPipe) _id: string) {
+    return await this.playersService.deletePlayerById(_id);
   }
 }
